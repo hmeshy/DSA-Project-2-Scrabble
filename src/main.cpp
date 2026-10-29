@@ -5,5 +5,8 @@ using namespace std;
 
 int main() {
 
-    return 0;
+    ScrabbleTrie bruh;
+    createDictionary("../assets/enable1.txt", bruh);
+    bruh.search("aardvark");
+    bruh.search("eifsdjfklsad");
 }
