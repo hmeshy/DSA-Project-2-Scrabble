@@ -20,6 +20,7 @@ class ScrabbleTrie{
     ScrabbleTrie();
     void insert(std::string word);
     bool search(std::string word);
+    void deleteWord(std::string word);
 
 };
 

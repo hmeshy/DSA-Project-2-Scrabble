@@ -40,7 +40,6 @@ bool ScrabbleTrie::search(std::string word) {
         }
         curr=curr->childrens[index];
     }
-    std::cout<<"found!"<<std::endl;
     return curr->endofWord;
 }
 
@@ -61,6 +60,22 @@ void createDictionary(std::string filepath,ScrabbleTrie& dictionary) {
         std::cout<<"success!"<<std::endl;
     }else {
         std::cout<<"error opening file";
+    }
+
+}
+
+void ScrabbleTrie::deleteWord(std::string word) {
+    TrieNode* curr=root;
+    for (char c : word) {
+        int index = c - 'a';
+        if (!curr->childrens[index]) {
+            return;
+        }
+        curr=curr->childrens[index];
+    }
+    if (curr->endofWord==true) {
+        curr->endofWord = false;
+        std::cout<<"deleted"<<std::endl;
     }
 
 }
