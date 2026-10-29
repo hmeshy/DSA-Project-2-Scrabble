@@ -10,7 +10,7 @@ class TrieNode {
     TrieNode* childrens[26];
     bool endofWord;
     TrieNode();
-
+    ~TrieNode();
 };
 
 

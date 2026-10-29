@@ -14,6 +14,15 @@ TrieNode::TrieNode() {
     }
 }
 
+TrieNode::~TrieNode() {
+    for (int i = 0; i < 26; i++) {
+        if (childrens[i]) {
+            delete childrens[i];
+        }
+    }
+}
+
+
 ScrabbleTrie::ScrabbleTrie() {
     root = new TrieNode();
 }
