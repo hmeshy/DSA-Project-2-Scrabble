@@ -7,10 +7,8 @@ int main() {
 
     ScrabbleTrie bruh;
     createDictionary("../assets/enable1.txt", bruh);
-    bruh.search("aardvark");
-    bruh.search("eifsdjfklsad");
-    bruh.deleteWord("aardvark");
-    if (bruh.search("aardvark")) {
-        cout<<"found aardvark"<<endl;
-    };
+    int score=sumScores(bruh,"hello");
+    int bad=sumScores(bruh,"bjkgfdd");
+    cout<<"score: "<<score<<endl;
+    cout<<"no score: "<<bad<<endl;
 }

@@ -135,6 +135,14 @@ CMakeFiles/DSA_Project_2_Scrabble.dir/src/main.cpp.obj: \
  C:/msys64/mingw64/include/c++/15.2.0/istream \
  C:/msys64/mingw64/include/c++/15.2.0/bits/istream.tcc \
  C:\Users\mcgra\Documents\GitHub\DSA-Project-2-Scrabble\src\trie.h \
+ C:/msys64/mingw64/include/c++/15.2.0/map \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_tree.h \
+ C:/msys64/mingw64/include/c++/15.2.0/ext/aligned_buffer.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_map.h \
+ C:/msys64/mingw64/include/c++/15.2.0/tuple \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/uses_allocator.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/stl_multimap.h \
+ C:/msys64/mingw64/include/c++/15.2.0/bits/erase_if.h \
  C:/msys64/mingw64/include/c++/15.2.0/fstream \
  C:/msys64/mingw64/include/c++/15.2.0/bits/codecvt.h \
  C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32/bits/basic_file.h \
