@@ -23,14 +23,12 @@ bool isWhitespace(char ch) {
 string normalizeInput(const string& txt) {
     size_t beg = 0;
     size_t end = txt.length();
-
     while (beg < end && isWhitespace(txt[beg])) {
         beg++;
     }
     while (end > beg && isWhitespace(txt[end - 1])) {
         end--;
     }
-
     string res = txt.substr(beg, end - beg);
     for (char& ch : res) {
         if (ch >= 'a' && ch <= 'z') {
@@ -40,8 +38,7 @@ string normalizeInput(const string& txt) {
     return res;
 }
 
-bool readPrompt(istream& in, ostream& out,
-                const string& label, string& line) {
+bool readPrompt(istream& in, ostream& out,const string& label, string& line) {
     out << label;
     out.flush();
     if (!getline(in, line)) {
@@ -90,18 +87,19 @@ bool parsePosition(const string& txt, Position& pos) {
 }
 } 
 
-void runWord(Board& board, istream& in, ostream& out) {
+void runWord(Board& board, ScrabbleTrie& dict, istream& in, ostream& out) {
     board.print(out);
-    out << "\nEnter your rack, then the word and its start/end positions.\n"
-           << "Type :quit at any prompt to exit.\n";
+    out << "\nenter your rack, then the word and its start/end positions.\n"
+           << "Type :quit at any time to exit the game :).\n";
 
     int turn = 1;
+    int player = 1;
     while (true) {
-        out << "\nTurn " << turn << '\n';
+        out << "\nTurn " << turn << " - Player " << player << '\n';
         string rack;
         while (true) {
             if (!readPrompt(in, out, "Your rack (1-7 letters): ", rack)) {
-                out << "\nGoodbye.\n";
+                out << "Bye!\n";
                 return;
             }
             if (isValid(rack)) {
@@ -115,39 +113,43 @@ void runWord(Board& board, istream& in, ostream& out) {
             string startStr;
             string endStr;
             if (!readPrompt(in, out, "Word: ", word)) {
-                out << "\nGoodbye.\n";
+                out << "Bye!\n";
                 return;
             }
-            if (!readPrompt(in, out, "Starting position (e.g. G8): ", startStr)) {
-                out << "\nGoodbye.\n";
+            if (!readPrompt(in, out, "Starting position (ex. G8): ", startStr)) {
+                out << "Bye!\n";
                 return;
             }
-            if (!readPrompt(in, out, "Ending position (e.g. I8): ", endStr)) {
-                out << "\nGoodbye.\n";
+            if (!readPrompt(in, out, "Ending position (ex. I8): ", endStr)) {
+                out << "Bye!\n";
                 return;
             }
 
             Position start;
             Position end;
             if (!parsePosition(startStr, start)) {
-                out << "Starting position must be A1 through O15 (for example, G8).\n"
+                out << "The starting position must be A1 through O15 .\n"
                        << "Try again with the same rack: " << rack << ".\n\n";
                 continue;
             }
             if (!parsePosition(endStr, end)) {
-                out << "Ending position must be A1 through O15 (for example, I8).\n"
+                out << "The ending position must be A1 through O15 .\n"
                        << "Try again with the same rack: " << rack << ".\n\n";
                 continue;
             }
 
             string msg;
-            if (!board.placeWord(word, start, end, rack, msg)) {
+            if (!board.placeWord(word, start, end, rack, dict, msg)) {
                 out << msg << "\nTry again with the same rack: " << rack << ".\n\n";
                 continue;
             }
 
             out << "\nPlaced " << word << " from " << startStr << " to " << endStr << ".\n";
-            out << "Word score: " << calcWordScore(word) << " points.\n";
+            string full = board.getWord(start, end);
+            if (full != word) {
+                out << "Word made: " << full << ".\n";
+            }
+            out << "Word score: " << calcWordScore(full) << " points.\n";
             out << "Remaining rack: ";
             if (rack.empty()) {
                 out << "(empty)";
@@ -157,6 +159,11 @@ void runWord(Board& board, istream& in, ostream& out) {
             out << ".\n\n";
             board.print(out);
             turn++;
+            if (player == 1) {
+                player = 2;
+            } else {
+                player = 1;
+            }
             break;
         }
     }

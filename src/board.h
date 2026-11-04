@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <string>
+#include "trie.h"
 using namespace std;
 struct Square {
     char letter;
@@ -25,15 +26,20 @@ public:
 
     const Square& getSquare(int row, int col) const;
     void print(ostream& out) const;
+    bool isEmpty() const;
+    string getWord(Position start, Position end) const;
 
     bool placeWord(const string& word, Position start, Position end,
-                   string& rack, string& msg);
+                   string& rack, ScrabbleTrie& dict, string& msg);
 
 private:
     Square grid[Size][Size];
 
     bool containLetters(const string& txt) const;
     bool withinBoard(Position pos) const;
+    bool hasNeighbor(Position pos) const;
+    string read(Position pos, int dr, int dc) const;
+    bool inDict(const string& word, ScrabbleTrie& dict) const;
     void printCol(ostream& out) const;
     void printBorder(ostream& out) const;
 };

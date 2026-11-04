@@ -56,8 +56,86 @@ const Square& Board::getSquare(int row, int col) const {
     return grid[row][col];
 }
 
+bool Board::isEmpty() const {
+    for (int row = 0; row < Size; row++) {
+        for (int col = 0; col < Size; col++) {
+            if (!grid[row][col].isEmpty()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool Board::hasNeighbor(Position pos) const {
+    if (pos.row > 0 && !grid[pos.row - 1][pos.column].isEmpty()) {
+        return true;
+    }
+    if (pos.row < Size - 1 && !grid[pos.row + 1][pos.column].isEmpty()) {
+        return true;
+    }
+    if (pos.column > 0 && !grid[pos.row][pos.column - 1].isEmpty()) {
+        return true;
+    }
+    if (pos.column < Size - 1 && !grid[pos.row][pos.column + 1].isEmpty()) {
+        return true;
+    }
+    return false;
+}
+
+string Board::read(Position pos, int dr, int dc) const {
+    if (!withinBoard(pos) || grid[pos.row][pos.column].isEmpty()) {
+        return "";
+    }
+
+    
+    Position prev = pos;
+    prev.row -= dr;
+    prev.column -= dc;
+    while (withinBoard(prev) && !grid[prev.row][prev.column].isEmpty()) {
+        pos = prev;
+        prev.row -= dr;
+        prev.column -= dc;
+    }
+
+    string word;
+    while (withinBoard(pos) && !grid[pos.row][pos.column].isEmpty()) {
+        word += grid[pos.row][pos.column].letter;
+        pos.row += dr;
+        pos.column += dc;
+    }
+    return word;
+}
+
+string Board::getWord(Position start, Position end) const {
+    if (!withinBoard(start) || !withinBoard(end)) {
+        return "";
+    }
+
+    string full;
+    if (start.row == end.row) {
+        full = read(start, 0, 1);
+    } else {
+        full = read(start, 1, 0);
+    }
+
+    
+    if (full.length() == 1) {
+        full = read(start, 1, 0);
+    }
+    return full;
+}
+
+bool Board::inDict(const string& word, ScrabbleTrie& dict) const {
+    string lower = word;
+    for (char& ch : lower) {
+        ch = ch - 'A' + 'a';
+    }
+    return dict.search(lower);
+}
+
 bool Board::placeWord(const string& word, Position start, Position end,
-                      string& rack, string& msg) {
+                      string& rack, ScrabbleTrie& dict, string& msg) {
     msg.clear();
     if (word.empty() || word.size() > Size || !containLetters(word)) {
         msg = "word must contain 1-15 letters (A-Z).";
@@ -98,12 +176,14 @@ bool Board::placeWord(const string& word, Position start, Position end,
     int dc = 0;
     if (end.row > start.row) {
         dr = 1;
-    } else if (end.column > start.column) {
+    } else {
         dc = 1;
     }
 
     string rackLeft = rack;
     int added = 0;
+    bool touch = false;
+    bool center = false;
     Position pos = start;
 
     
@@ -112,7 +192,7 @@ bool Board::placeWord(const string& word, Position start, Position end,
         char letter = word[idx];
 
         if (sq.isEmpty()) {
-            size_t rackIdx = rackLeft.find(letter);
+            size_t rackIdx= rackLeft.find(letter);
             if (rackIdx == string::npos) {
                 msg = string("Your rack does not have enough ") + letter
                     + " tiles for this placement.";
@@ -122,12 +202,19 @@ bool Board::placeWord(const string& word, Position start, Position end,
             added++;
         } else if (sq.letter != letter) {
             string coord;
-            char colChar = 'A' + pos.column;
+            char colChar = 'A' +pos.column;
             coord += colChar;
             coord += to_string(pos.row + 1);
             msg = coord + " already contains " + sq.letter
                 + ", but this word requires " + letter + ".";
             return false;
+        }
+
+        if (!sq.isEmpty()|| hasNeighbor(pos)) {
+            touch = true;
+        }
+        if (pos.row == Size / 2 && pos.column == Size / 2) {
+            center = true;
         }
 
         pos.row += dr;
@@ -139,13 +226,49 @@ bool Board::placeWord(const string& word, Position start, Position end,
         return false;
     }
 
-    // Everything passed. Now place the word and update the real rack.
+    bool first = isEmpty();
+    if (first && !center) {
+        msg =  "The first word must cover the center star at H8.";
+        return false;
+    }
+    if (first && wordLen < 2) {
+        msg =  "The first word must contain at least two letters.";
+        return false;
+    }
+    if (!first && !touch) {
+        msg = "The word must connect to the tiles already on the board.";
+        return false;
+    }
+
+    Board temp = *this;
     pos = start;
     for (int idx = 0; idx < wordLen; idx++) {
-        grid[pos.row][pos.column].letter = word[idx];
+        temp.grid[pos.row][pos.column].letter = word[idx];
         pos.row += dr;
         pos.column += dc;
     }
+
+    string full = temp.getWord(start, end);
+    if (full.length() < 2 || !inDict(full, dict)) {
+        msg = "The word " + full + " is not in the dictionary.";
+        return false;
+    }
+
+    
+    pos = start;
+    for (int idx = 0; idx < wordLen; idx++) {
+        if (grid[pos.row][pos.column].isEmpty()) {
+            string cross = temp.read(pos, dc, dr);
+            if (cross.length() > 1 && !inDict(cross, dict)) {
+                msg = "The crossing word " + cross + " is not in the dictionary.";
+                return false;
+            }
+        }
+        pos.row += dr;
+        pos.column += dc;
+    }
+
+    *this = temp;
     rack = rackLeft;
     return true;
 }

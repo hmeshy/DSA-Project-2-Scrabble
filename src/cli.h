@@ -6,6 +6,6 @@
 #include <istream>
 #include <ostream>
 
-void runWordEntry(Board& board, std::istream& in, std::ostream& out);
+void runWord(Board& board, ScrabbleTrie& dict, std::istream& in, std::ostream& out);
 
 #endif
