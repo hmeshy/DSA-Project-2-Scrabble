@@ -28,6 +28,7 @@ public:
     void print(ostream& out) const;
     bool isEmpty() const;
     bool isAnchor(Position pos) const;
+    bool isOccupied(Position pos) const;
     string getWord(Position start, Position end) const;
     bool placeWord(const string& word, Position start, Position end,
                    string& rack, ScrabbleTrie& dict, string& msg);

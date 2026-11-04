@@ -18,7 +18,7 @@ string printMove(Move& move, int score); // command for debugging and for help i
 vector<Move> generateMovesGADDAG(Board& board, string& rack, ScrabbleGaddag& dict);
 // helper commands will go here :D
 vector<Move> generateMovesAtSquare(Board& board, string& rack, ScrabbleGaddag& dict, Position pos);
-void verticalSearcher(Board& board, std::unordered_multiset<char> partialTiles, GaddagNode* node, Position currPos, vector<Move>& moves);
-void horizontalSearcher(Board& board, std::unordered_multiset<char> partialTiles, GaddagNode* node, Position currPos, vector<Move>& moves);
+void verticalSearcher(Board& board, std::unordered_multiset<char>& partialTiles, std::string partialWord, GaddagNode* node, Position currPos, vector<Move>& moves, bool forward);
+void horizontalSearcher(Board& board, std::unordered_multiset<char>& partialTiles, std::string partialWord, GaddagNode* node, Position currPos, vector<Move>& moves, bool forward);
 bool crossChecksPass(Board& board, char tile, Position place, bool horizontal);
 #endif

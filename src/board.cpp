@@ -71,6 +71,10 @@ bool Board::isAnchor(Position pos) const {
     return (grid[pos.row][pos.column].isEmpty()) && hasNeighbor(pos);
 }
 
+bool Board::isOccupied(Position pos) const {
+    return grid[pos.row][pos.column].isEmpty();
+}
+
 bool Board::hasNeighbor(Position pos) const {
     if (pos.row > 0 && !grid[pos.row - 1][pos.column].isEmpty()) {
         return true;
