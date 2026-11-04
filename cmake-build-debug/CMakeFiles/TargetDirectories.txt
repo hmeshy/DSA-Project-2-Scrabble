@@ -1,3 +1,0 @@
-C:/Users/mcgra/Documents/GitHub/DSA-Project-2-Scrabble/cmake-build-debug/CMakeFiles/DSA_Project_2_Scrabble.dir
-C:/Users/mcgra/Documents/GitHub/DSA-Project-2-Scrabble/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/mcgra/Documents/GitHub/DSA-Project-2-Scrabble/cmake-build-debug/CMakeFiles/rebuild_cache.dir

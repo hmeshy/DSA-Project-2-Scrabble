@@ -2,8 +2,8 @@
 // TODO - consider a more consise representation of the Gaddag later on
 
 #include <string>
-#include <map>
-#include <fstream>
+#include <vector>
+
 #ifndef DSA_PROJECT_2_SCRABBLE_GADDAG_H
 #define DSA_PROJECT_2_SCRABBLE_GADDAG_H
 class GaddagNode {
@@ -18,14 +18,17 @@ class GaddagNode {
 class ScrabbleGaddag{
     GaddagNode* root;
     public:
-    ScrabbleGaddag();
-    ~ScrabbleGaddag();
-    void insert(std::string word);
-    bool includes(std::string word);
+        ScrabbleGaddag();
+        ~ScrabbleGaddag();
+        void insert(std::string word);
+        bool includes(std::string word); // check if all representations of a word are included
+        std::string printWords(); // use BFS to print (ONLY USE FOR SMALL CASES!)
+        int getSize(); // returns number of words; good test for iteration, correctness
+    private:
+        std::vector<std::string> printWordsHelper(GaddagNode* curr, int letterIndex);
+        int getSizeHelper(GaddagNode* curr);
 };
 
 void createDictionary(std::string file, ScrabbleGaddag& dictionary);
-
-std::map<char,int> createScores();
 
 #endif //DSA_PROJECT_2_SCRABBLE_TRIE_H

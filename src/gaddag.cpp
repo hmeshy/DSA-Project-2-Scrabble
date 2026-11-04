@@ -1,5 +1,6 @@
 
 #include <sstream>
+#include <fstream>
 #include <filesystem>
 #include <iostream>
 #include <map>
@@ -20,43 +21,154 @@ GaddagNode::~GaddagNode() {
         }
     }
 }
-/*
 
-ScrabbleTrie::ScrabbleTrie() {
-    root = new TrieNode();
+
+ScrabbleGaddag::ScrabbleGaddag() {
+    root = new GaddagNode();
 }
 
-void ScrabbleTrie::insert(std::string word) {
-    TrieNode* curr = root;
-    for (char c : word) {
-        int index = c - 'a';
-        if (!curr->childrens[index]) {
-            curr->childrens[index] = new TrieNode();
+ScrabbleGaddag::~ScrabbleGaddag() {
+    delete root;
+}
+
+void ScrabbleGaddag::insert(std::string word) {
+    // insert all possible bidirectional storage of a word
+    // ex: CARE => C * ARE, AC * RE, RAC * E, ERAC
+    for (int i = 0; i < word.size(); i++) {
+        int firstInd = i;
+        int currInd = firstInd;
+        GaddagNode* curr = root;
+        // add reverse part
+        while (currInd >= 0) {
+            char currChar = word[currInd];
+            int index = currChar - 'a';
+            if (!curr->children[index]) {
+                curr->children[index] = new GaddagNode();
+            }
+            curr=curr->children[index];
+            currInd--;
         }
-        curr=curr->childrens[index];
+        currInd = firstInd + 1;
+        // add delimiter
+        if (currInd != word.size()) {
+            if (!curr->children[26]) {
+                curr->children[26] = new GaddagNode();
+            }
+            curr=curr->children[26];
+        }
+        // add forward part
+        while (currInd < word.size()) {
+            char currChar = word[currInd];
+            int index = currChar - 'a';
+            if (!curr->children[index]) {
+                curr->children[index] = new GaddagNode();
+            }
+            curr=curr->children[index];
+            currInd++;
+        }
+        curr->terminal = true;
     }
-    curr->endofWord = true;
 }
 
-bool ScrabbleTrie::search(std::string word) {
-    TrieNode* curr = root;
-    for (char c : word) {
-        int index = c - 'a';
-        if (!curr->childrens[index]) {
-            std::cout<<"not found!"<<std::endl;
+bool ScrabbleGaddag::includes(std::string word) {
+    for (int i = 0; i < word.size(); i++) {
+        int firstInd = i;
+        int currInd = firstInd;
+        GaddagNode* curr = root;
+        // add reverse part
+        while (currInd >= 0) {
+            char currChar = word[currInd];
+            int index = currChar - 'a';
+            if (!curr->children[index]) {
+                return false;
+            }
+            curr=curr->children[index];
+            currInd--;
+        }
+        currInd = firstInd + 1;
+        // add delimiter
+        if (currInd != word.size()) {
+            if (!curr->children[26]) {
+                return false;
+            }
+            curr=curr->children[26];
+        }
+        // add forward part
+        while (currInd < word.size()) {
+            char currChar = word[currInd];
+            int index = currChar - 'a';
+            if (!curr->children[index]) {
+                return false;
+            }
+            curr=curr->children[index];
+            currInd++;
+        }
+        // check if terminal
+        if (!curr->terminal) {
             return false;
         }
-        curr=curr->childrens[index];
     }
-    return curr->endofWord;
+    return true;
+}
+
+std::string ScrabbleGaddag::printWords() {
+    std::string words;
+    for (int i = 0; i < 27; i++) {
+        if (root->children[i]) {
+            std::vector<std::string> letterWords = printWordsHelper(root->children[i], i);
+            for (std::string word : letterWords) {
+                words += (word + "\n");
+            }
+        }
+    }
+    return words;
+}
+
+std::vector<std::string> ScrabbleGaddag::printWordsHelper(GaddagNode* curr, int letterIndex) {
+    char letter = 'A' + letterIndex;
+    if (letterIndex == 26) {
+        letter = '*';
+    }
+    std::vector<std::string> results;
+    if (curr->terminal) {
+        results.push_back(std::string{letter});
+    }
+    for (int i = 0; i < 27; i++) {
+        if (curr->children[i]) {
+            std::vector<std::string> letterWords = printWordsHelper(curr->children[i], i);
+            for (std::string word : letterWords) {
+                results.push_back(letter + word);
+            }
+        }
+    }
+    return results;
+}
+int ScrabbleGaddag::getSize() {
+    int size = 0;
+    for (int i = 0; i < 27; i++) {
+        if (root->children[i]) {
+            int letterSize = getSizeHelper(root->children[i]);
+            size += letterSize;
+        }
+    }
+    return size;
+}
+int ScrabbleGaddag::getSizeHelper(GaddagNode* curr) {
+    int size = 0;
+    if (curr->terminal) {
+        size++;
+    }
+    for (int i = 0; i < 27; i++) {
+        if (curr->children[i]) {
+            int letterSize = getSizeHelper(curr->children[i]);
+            size += letterSize;
+        }
+    }
+    return size;
 }
 
 
-
-
-
-
-void createDictionary(std::string filepath,ScrabbleTrie& dictionary) {
+void createDictionary(std::string filepath,ScrabbleGaddag& dictionary) {
     std::ifstream dict(filepath);
     if (dict.is_open()) {
         std::string word;
@@ -66,48 +178,7 @@ void createDictionary(std::string filepath,ScrabbleTrie& dictionary) {
         }
         dict.close();
         std::cout<<"success!"<<std::endl;
-    }else {
+    }   else {
         std::cout<<"error opening file";
     }
-
 }
-
-void ScrabbleTrie::deleteWord(std::string word) {
-    TrieNode* curr=root;
-    for (char c : word) {
-        int index = c - 'a';
-        if (!curr->childrens[index]) {
-            return;
-        }
-        curr=curr->childrens[index];
-    }
-    if (curr->endofWord==true) {
-        curr->endofWord = false;
-        std::cout<<"deleted"<<std::endl;
-    }
-
-}
-std::map<char,int> createScores() {
-    std::map<char, int> scores = {
-        {'a', 1},{'b', 3},{'c', 3},{'d', 2},{'e', 1},{'f', 4},{'g', 2},
-{'h', 4},{'i', 1},{'j', 8},{'k', 5},{'l', 1},{'m', 3},{'n', 1},{'o', 1},{'p', 3},{'q', 10},{'r', 1},{'s', 1},
-{'t',1},{'u', 1},{'v', 4},{'w',4},{'x', 8},{'y', 4},{'z', 10}
-    };
-
-    return scores;
-
-};
-
-int sumScores(ScrabbleTrie &dictionary, std::string word) {
-    if (!dictionary.search(word)) {
-        return 0;
-    }
-    std::map<char, int> scores=createScores();
-    int score=0;
-    for (char c : word) {
-        auto it=scores.find(c);
-        score+=it->second;
-    }
-    return score;
-};
-*/
