@@ -1,6 +1,5 @@
-//
-// Created by mcgra on 10/28/2026.
-//
+// TODO - implement all of the Big 5 or use smart pointers
+
 #include <string>
 #include <map>
 #include <fstream>
@@ -19,6 +18,7 @@ class ScrabbleTrie{
     TrieNode* root;
     public:
     ScrabbleTrie();
+    ~ScrabbleTrie();
     void insert(std::string word);
     bool search(std::string word);
     void deleteWord(std::string word);

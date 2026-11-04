@@ -1,3 +1,6 @@
+// TODO - implement all of the Big 5 or use smart pointers
+// TODO - consider a more consise representation of the Gaddag later on
+
 #include <string>
 #include <map>
 #include <fstream>

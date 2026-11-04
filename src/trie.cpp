@@ -27,6 +27,9 @@ TrieNode::~TrieNode() {
 ScrabbleTrie::ScrabbleTrie() {
     root = new TrieNode();
 }
+ScrabbleTrie::~ScrabbleTrie() {
+    delete root;
+}
 
 void ScrabbleTrie::insert(std::string word) {
     TrieNode* curr = root;
