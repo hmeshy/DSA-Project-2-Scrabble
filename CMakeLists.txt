@@ -13,3 +13,5 @@ set(SCRABBLE_SRC
         src/gaddag-movegen.cpp
         src/game.cpp
 )
+
+add_executable(DSA_Project_2_Scrabble src/main.cpp ${SCRABBLE_SRC})
