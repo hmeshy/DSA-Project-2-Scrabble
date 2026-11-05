@@ -1,5 +1,3 @@
-// TODO - implement all of the Big 5 or use smart pointers
-
 #include <string>
 #include <map>
 #include <fstream>
@@ -19,6 +17,7 @@ class ScrabbleTrie{
     public:
     ScrabbleTrie();
     ~ScrabbleTrie();
+    const TrieNode* getRoot() const { return root; }
     void insert(std::string word);
     bool search(std::string word);
     void deleteWord(std::string word);
@@ -33,4 +32,4 @@ int sumScores(ScrabbleTrie& dictionary, std::string word);
 
 
 
-#endif //DSA_PROJECT_2_SCRABBLE_TRIE_H
+#endif 
