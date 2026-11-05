@@ -29,15 +29,15 @@ public:
     bool isEmpty() const;
     bool isAnchor(Position pos) const;
     bool isOccupied(Position pos) const;
+    char getLetter(Position pos) const;
     string getWord(Position start, Position end) const;
     bool placeWord(const string& word, Position start, Position end,
                    string& rack, ScrabbleTrie& dict, string& msg);
-
+    bool withinBoard(Position pos) const;
 private:
     Square grid[Size][Size];
 
     bool containLetters(const string& txt) const;
-    bool withinBoard(Position pos) const;
     bool hasNeighbor(Position pos) const;
     string read(Position pos, int dr, int dc) const;
     bool inDict(const string& word, ScrabbleTrie& dict) const;

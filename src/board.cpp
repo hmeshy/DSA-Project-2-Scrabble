@@ -68,12 +68,18 @@ bool Board::isEmpty() const {
 }
 
 bool Board::isAnchor(Position pos) const {
+    if (isEmpty()) {
+        return (pos.row == 8 && pos.column == 8); // on an empty board, you can play on the middle square 
+    }
     return (grid[pos.row][pos.column].isEmpty()) && hasNeighbor(pos);
 }
 
 bool Board::isOccupied(Position pos) const {
-    return grid[pos.row][pos.column].isEmpty();
+    return withinBoard(pos) && !grid[pos.row][pos.column].isEmpty();
 }
+char Board::getLetter(Position pos) const {
+    return grid[pos.row][pos.column].letter;
+} 
 
 bool Board::hasNeighbor(Position pos) const {
     if (pos.row > 0 && !grid[pos.row - 1][pos.column].isEmpty()) {

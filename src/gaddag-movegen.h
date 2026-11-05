@@ -18,7 +18,7 @@ string printMove(Move& move, int score); // command for debugging and for help i
 vector<Move> generateMovesGADDAG(Board& board, string& rack, ScrabbleGaddag& dict);
 // helper commands will go here :D
 vector<Move> generateMovesAtSquare(Board& board, string& rack, ScrabbleGaddag& dict, Position pos);
-void verticalSearcher(Board& board, std::unordered_multiset<char>& partialTiles, std::string partialWord, GaddagNode* node, Position currPos, vector<Move>& moves, bool forward);
-void horizontalSearcher(Board& board, std::unordered_multiset<char>& partialTiles, std::string partialWord, GaddagNode* node, Position currPos, vector<Move>& moves, bool forward);
+void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::string partialWord, GaddagNode* node, Position currPos, vector<Move>& moves, bool horizontal, bool forward);
 bool crossChecksPass(Board& board, char tile, Position place, bool horizontal);
+bool addMove(Board& board, std::string partialWord, Position currPos, vector<Move>& moves, bool horizontal, bool forward); // BEFORE calling next level, if TERMINAL and the tiles after the back and front are NOT OCCUPIED, add move!
 #endif
