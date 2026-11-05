@@ -42,19 +42,19 @@ vector<Move> generateMovesAtSquare(Board& board, string& rack, ScrabbleGaddag& d
         tiles.insert(c);
     }
     // vertical
-    Searcher(board, tiles, "", dict.getRoot(), pos, moves, false, false);
+    Searcher(board, tiles, "", dict.getRoot(), dict.getRoot(), pos, moves, false, false);
     // horizontal
-    Searcher(board, tiles, "", dict.getRoot(), pos, moves, true, false);
+    Searcher(board, tiles, "", dict.getRoot(), dict.getRoot(), pos, moves, true, false);
     return moves;
 }
 
-void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::string partialWord, GaddagNode* node, Position currPos, vector<Move>& moves, bool horizontal, bool forward) {
+void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::string partialWord, GaddagNode* node, GaddagNode* root, Position currPos, vector<Move>& moves, bool horizontal, bool forward) {
     if (partialWord == "") {
         // first call
         // check all tiles A - Z
         for (int i = 0; i < 26; i++) {
             char tile = 'A' + i;
-            if (partialTiles.count(tile) != 0 && node->children[i] && crossChecksPass(board, tile, currPos, horizontal)) {
+            if (partialTiles.count(tile) != 0 && node->children[i] && crossChecksPass(board, tile, root, currPos, horizontal)) {
                 // place move
                 auto tile_it = partialTiles.find(tile);
                 partialTiles.erase(tile_it);
@@ -65,7 +65,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                     currPos.row--;
                 }
                 // recursive call
-                Searcher(board, partialTiles, (partialWord + tile), node->children[i], currPos, moves, horizontal, forward);
+                Searcher(board, partialTiles, (partialWord + tile), node->children[i], root, currPos, moves, horizontal, forward);
                 // undo changes
                 partialTiles.insert(tile);
                 if (horizontal) {
@@ -80,7 +80,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
         if (partialTiles.count('?') != 0) {
             for (int i = 0; i < 26; i++) {
                 char letter = 'a' + i;
-                if (node->children[i] && crossChecksPass(board, letter, currPos, horizontal)) {
+                if (node->children[i] && crossChecksPass(board, letter, root, currPos, horizontal)) {
                     auto tile_it = partialTiles.find('?');
                     partialTiles.erase(tile_it);
                     if (horizontal) {
@@ -90,7 +90,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                         currPos.row--;
                     }
                     // recursive call
-                    Searcher(board, partialTiles, (partialWord + letter), node->children[i], currPos, moves, horizontal, forward);
+                    Searcher(board, partialTiles, (partialWord + letter), node->children[i], root, currPos, moves, horizontal, forward);
                     // undo changes
                     partialTiles.insert('?');
                     if (horizontal) {
@@ -124,7 +124,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                     else {
                         currPos.row++;
                     }
-                    Searcher(board, partialTiles, nextWord, nextNode, currPos, moves, horizontal, forward);
+                    Searcher(board, partialTiles, nextWord, nextNode, root, currPos, moves, horizontal, forward);
                     if (horizontal) {
                         currPos.column--;
                     }
@@ -144,7 +144,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                     else {
                         currPos.row--;
                     }
-                    Searcher(board, partialTiles, nextWord, nextNode, currPos, moves, horizontal, forward);
+                    Searcher(board, partialTiles, nextWord, nextNode, root, currPos, moves, horizontal, forward);
                     if (horizontal) {
                         currPos.column++;
                     }
@@ -164,7 +164,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                 else {
                     currPos.row += (partialWord.size() + 1);
                 }
-                Searcher(board, partialTiles, partialWord, node->children[26], currPos, moves, horizontal, true);
+                Searcher(board, partialTiles, partialWord, node->children[26], root, currPos, moves, horizontal, true);
                 if (horizontal) {
                     currPos.column -= (partialWord.size() + 1);
                 }
@@ -179,7 +179,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
             // regular tiles
             for (int i = 0; i < 26; i++) {
                 char tile = 'A' + i;
-                if (partialTiles.count(tile) != 0 && node->children[i] && (!isAnchor || crossChecksPass(board, tile, currPos, horizontal))) {
+                if (partialTiles.count(tile) != 0 && node->children[i] && (!isAnchor || crossChecksPass(board, tile, root, currPos, horizontal))) {
                     // place move
                     auto tile_it = partialTiles.find(tile);
                     partialTiles.erase(tile_it);
@@ -196,7 +196,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                             currPos.row += 1;
                         }
                         // recursive call
-                        Searcher(board, partialTiles, nextWord, nextNode, currPos, moves, horizontal, forward);
+                        Searcher(board, partialTiles, nextWord, nextNode, root, currPos, moves, horizontal, forward);
                         // undo changes 
                         if (horizontal) {
                             currPos.column -= 1;
@@ -217,7 +217,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                             currPos.row -= 1;
                         }
                         // recursive call
-                        Searcher(board, partialTiles, nextWord, nextNode, currPos, moves, horizontal, forward);
+                        Searcher(board, partialTiles, nextWord, nextNode, root, currPos, moves, horizontal, forward);
                         // undo changes 
                         if (horizontal) {
                             currPos.column += 1;
@@ -233,7 +233,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
             if (partialTiles.count('?') != 0) {
                 for (int i = 0; i < 26; i++) {
                     char letter = 'a' + i;
-                    if (node->children[i] && (!isAnchor || crossChecksPass(board, letter, currPos, horizontal))) {
+                    if (node->children[i] && (!isAnchor || crossChecksPass(board, letter, root, currPos, horizontal))) {
                         // place move
                         auto tile_it = partialTiles.find('?');
                         partialTiles.erase(tile_it);
@@ -250,7 +250,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                                 currPos.row += 1;
                             }
                             // recursive call
-                            Searcher(board, partialTiles, nextWord, nextNode, currPos, moves, horizontal, forward);
+                            Searcher(board, partialTiles, nextWord, nextNode, root, currPos, moves, horizontal, forward);
                             // undo changes 
                             if (horizontal) {
                                 currPos.column -= 1;
@@ -271,7 +271,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                                 currPos.row -= 1;
                             }
                             // recursive call
-                            Searcher(board, partialTiles, nextWord, nextNode, currPos, moves, horizontal, forward);
+                            Searcher(board, partialTiles, nextWord, nextNode, root, currPos, moves, horizontal, forward);
                             // undo changes 
                             if (horizontal) {
                                 currPos.column += 1;
@@ -292,7 +292,7 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
                 else {
                     currPos.row += (partialWord.size() + 1);
                 }
-                Searcher(board, partialTiles, partialWord, node->children[26], currPos, moves, horizontal, true);
+                Searcher(board, partialTiles, partialWord, node->children[26], root, currPos, moves, horizontal, true);
                 if (horizontal) {
                     currPos.column -= (partialWord.size() + 1);
                 }
@@ -303,14 +303,170 @@ void Searcher(Board& board, std::unordered_multiset<char>& partialTiles, std::st
         }        
     }
 }
-bool crossChecksPass(Board& board, char tile, Position place, bool horizontal) {
+bool crossChecksPass(Board& board, char tile, GaddagNode* root, Position place, bool horizontal) {
     // if horizontal, make sure the vertical forms a word :)
     if (horizontal) {
-
+        if (!board.isOccupied(Position{place.row-1, place.column}) && !board.isOccupied(Position{place.row+1, place.column})) {
+            return true; // no other words made
+        }
+        Position currPos = place;
+        bool topOccupied = false;
+        while(board.isOccupied(Position{currPos.row-1, currPos.column})){
+            topOccupied = true;
+            currPos.row--;
+            char placed = board.getLetter(currPos);
+            int letterIndex = placed - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = placed - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+        }
+        if (topOccupied) {
+            // reverse, add current tile
+            if(!root->children[26]) {
+                return false;
+            }
+            root = root->children[26];
+            int letterIndex = tile - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = tile - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+        }
+        else {
+            // add current tile, reverse
+            int letterIndex = tile - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = tile - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+            if(!root->children[26]) {
+                return false;
+            }
+            root = root->children[26];
+        }
+        currPos = place;
+        while(board.isOccupied(Position{currPos.row+1, currPos.column})){
+            currPos.row++;
+            char placed = board.getLetter(currPos);
+            int letterIndex = placed - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = placed - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+        }
     }
     // if vertical, make sure the horizontal forms a word :)
     else {
-        
+        if (!board.isOccupied(Position{place.row, place.column-1}) && !board.isOccupied(Position{place.row, place.column+1})) {
+            return true; // no other words made
+        }
+        Position currPos = place;
+        bool leftOccupied = false;
+        while(board.isOccupied(Position{currPos.row, currPos.column-1})){
+            leftOccupied = true;
+            currPos.column--;
+            char placed = board.getLetter(currPos);
+            int letterIndex = placed - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = placed - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+        }
+        if (leftOccupied) {
+            // reverse, add current tile
+            if(!root->children[26]) {
+                return false;
+            }
+            root = root->children[26];
+            int letterIndex = tile - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = tile - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+        }
+        else {
+            // add current tile, reverse
+            int letterIndex = tile - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = tile - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+            if(!root->children[26]) {
+                return false;
+            }
+            root = root->children[26];
+        }
+        currPos = place;
+        while(board.isOccupied(Position{currPos.row, currPos.column+1})){
+            currPos.column++;
+            char placed = board.getLetter(currPos);
+            int letterIndex = placed - 'A';
+            if (letterIndex > 25) { // adjust index for blanks
+                letterIndex = placed - 'a';
+            }
+            if (!root->children[letterIndex]) {
+                return false;
+            }
+            root = root->children[letterIndex];
+        }
     }
+    return root->terminal;
 }
-bool addMove(Board& board, std::string partialWord, Position currPos, vector<Move>& moves, bool horizontal, bool forward); // BEFORE calling next level, if TERMINAL and the tiles after the back and front are NOT OCCUPIED, add move!
+bool addMove(Board& board, std::string partialWord, Position currPos, vector<Move>& moves, bool horizontal, bool forward) { // we have a terminal word, so we just need to confirm the other tiles are not occupied
+    Position left;
+    Position right;
+    if (horizontal && forward) {
+        // we are going left to right, and on the rightmost square
+        left = Position{currPos.row, int(currPos.column-partialWord.size())};
+        right = Position{currPos.row, currPos.column + 1};
+    }
+    else if (horizontal && !forward) {
+        // we are going from left to right, and on the leftmost square
+        left = Position{currPos.row, currPos.column-1};
+        right = Position{currPos.row, int(currPos.column + partialWord.size())};
+    }
+    else if (!horizontal && forward) {
+        // we are going from top to bottom and on the bottommost square
+        left = Position{int(currPos.row-partialWord.size()), currPos.column};
+        right = Position{currPos.row+1, currPos.column};
+    }
+    else if (!horizontal && !forward) {
+        left = Position{currPos.row-1, currPos.column};
+        right = Position{int(currPos.row+partialWord.size()), currPos.column};
+    }
+    if (board.isOccupied(left) || board.isOccupied(right)) {
+        return false;
+    }
+    // valid move, add it
+    Move move;
+    if (horizontal) {
+        move = Move{partialWord, left.row, left.column + 1, horizontal};
+    }
+    else {
+        move = Move{partialWord, left.row + 1, left.column, horizontal};
+    }
+    moves.push_back(move);
+    return true;
+}
