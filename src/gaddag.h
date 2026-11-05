@@ -21,6 +21,7 @@ class ScrabbleGaddag{
         ScrabbleGaddag();
         ~ScrabbleGaddag();
         void insert(std::string word);
+        GaddagNode* getRoot();
         bool includes(std::string word); // check if all representations of a word are included
         std::string printWords(); // use BFS to print (ONLY USE FOR SMALL CASES!)
         int getSize(); // returns number of words; good test for iteration, correctness

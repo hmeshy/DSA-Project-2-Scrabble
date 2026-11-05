@@ -31,6 +31,10 @@ ScrabbleGaddag::~ScrabbleGaddag() {
     delete root;
 }
 
+GaddagNode* ScrabbleGaddag::getRoot() {
+    return root;
+}
+
 void ScrabbleGaddag::insert(std::string word) {
     // insert all possible bidirectional storage of a word
     // ex: CARE => C * ARE, AC * RE, RAC * E, ERAC
