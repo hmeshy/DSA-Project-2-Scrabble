@@ -2,6 +2,7 @@
 #define DSA_PROJECT_2_SCRABBLE_GADDAG_MOVEGEN_H
 
 #include <string>
+#include <unordered_set>
 #include "board.h"
 #include "gaddag.h"
 using namespace std;

@@ -13,4 +13,6 @@ add_executable(DSA_Project_2_Scrabble
         src/trie.h
         src/gaddag.cpp
         src/gaddag.h
+        src/gaddag-movegen.cpp
+        src/gaddag-movegen.h
 )

@@ -31,5 +31,6 @@ class ScrabbleGaddag{
 };
 
 void createDictionary(std::string file, ScrabbleGaddag& dictionary);
+int expectedWords(std::string file);
 
 #endif //DSA_PROJECT_2_SCRABBLE_TRIE_H

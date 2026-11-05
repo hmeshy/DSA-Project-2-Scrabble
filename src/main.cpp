@@ -32,6 +32,7 @@ int main() {
     ScrabbleGaddag bigGaddag;
     createDictionary("../assets/enable1.txt", bigGaddag);
     cout << "Created GADDAG with " << bigGaddag.getSize() << " word representations." << endl;
+    cout << "Expected Words: " << expectedWords("../assets/enable1.txt") << endl;
     cout << "includes good: " << bigGaddag.includes("good") << endl;
     cout << "includes abacaba: " << bigGaddag.includes("abacaba") << endl;
     ScrabbleGaddag smallGaddag;
@@ -43,6 +44,6 @@ int main() {
     
     Board board;
     std::cout << "Scrabble Board\n\n";
-    runWord(board, bruh, std::cin, std::cout);
+    runWordGADDAG(board, bruh, bigGaddag, std::cin, std::cout);
     return 0;
 }

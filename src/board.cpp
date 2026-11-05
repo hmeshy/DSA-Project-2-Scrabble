@@ -69,7 +69,7 @@ bool Board::isEmpty() const {
 
 bool Board::isAnchor(Position pos) const {
     if (isEmpty()) {
-        return (pos.row == 8 && pos.column == 8); // on an empty board, you can play on the middle square 
+        return (pos.row == 7 && pos.column == 7); // on an empty board, you can play on the middle square 
     }
     return (grid[pos.row][pos.column].isEmpty()) && hasNeighbor(pos);
 }

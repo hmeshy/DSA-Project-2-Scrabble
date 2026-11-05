@@ -186,3 +186,17 @@ void createDictionary(std::string filepath,ScrabbleGaddag& dictionary) {
         std::cout<<"error opening file";
     }
 }
+int expectedWords(std::string filepath) {
+    int count = 0;
+    std::ifstream dict(filepath);
+    if (dict.is_open()) {
+        std::string word;
+        while (std::getline(dict, word)) {
+            count += word.size();
+        }
+        dict.close();
+    }   else {
+        std::cout<<"error opening file";
+    }
+    return count;
+}

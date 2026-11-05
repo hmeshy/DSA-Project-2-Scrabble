@@ -6,12 +6,14 @@ string printMove(Move& move) {
     // regular letters are UPPERCASE, blanks are lowercase; already in row
     string val;
     if (move.horizontal) {
-        val += ('0' + move.startRow) + ('A' + move.startCol - 1) + " "; 
+        val += to_string(move.startRow+1);
+        val += ('A' + move.startCol); 
     }
     else {
-        val += ('A' + move.startCol - 1) + ('0' + move.startRow) + " "; 
+        val += ('A' + move.startCol);
+        val += to_string(move.startRow+1); 
     }
-    val += move.word;
+    val += " " + move.word;
     return val;
 }
 string printMove(Move& move, int score) {
