@@ -1,11 +1,24 @@
 
-#include <sstream>
 #include <fstream>
-#include <filesystem>
 #include <iostream>
-#include <map>
 #include "gaddag.h"
 
+namespace {
+bool cleanWord(std::string& word) {
+    if (word.empty()) {
+        return false;
+    }
+    for (char& ch : word) {
+        if (ch >= 'A' && ch <= 'Z') {
+            ch = ch - 'A' + 'a';
+        }
+        if (ch < 'a' || ch > 'z') {
+            return false;
+        }
+    }
+    return true;
+}
+}
 
 GaddagNode::GaddagNode() {
     terminal = false;
@@ -36,13 +49,12 @@ GaddagNode* ScrabbleGaddag::getRoot() {
 }
 
 void ScrabbleGaddag::insert(std::string word) {
-    // insert all possible bidirectional storage of a word
-    // ex: CARE => C * ARE, AC * RE, RAC * E, ERAC
-    for (int i = 0; i < word.size(); i++) {
+    if (!cleanWord(word)) return;
+    int len = static_cast<int>(word.length());
+    for (int i = 0; i < len; i++) {
         int firstInd = i;
         int currInd = firstInd;
         GaddagNode* curr = root;
-        // add reverse part
         while (currInd >= 0) {
             char currChar = word[currInd];
             int index = currChar - 'a';
@@ -53,15 +65,13 @@ void ScrabbleGaddag::insert(std::string word) {
             currInd--;
         }
         currInd = firstInd + 1;
-        // add delimiter
-        if (currInd != word.size()) {
+        if (currInd != len) {
             if (!curr->children[26]) {
                 curr->children[26] = new GaddagNode();
             }
             curr=curr->children[26];
         }
-        // add forward part
-        while (currInd < word.size()) {
+        while (currInd < len) {
             char currChar = word[currInd];
             int index = currChar - 'a';
             if (!curr->children[index]) {
@@ -75,11 +85,14 @@ void ScrabbleGaddag::insert(std::string word) {
 }
 
 bool ScrabbleGaddag::includes(std::string word) {
-    for (int i = 0; i < word.size(); i++) {
+    if (!cleanWord(word)) {
+        return false;
+    }
+    int len = static_cast<int>(word.length());
+    for (int i = 0; i < len; i++) {
         int firstInd = i;
         int currInd = firstInd;
         GaddagNode* curr = root;
-        // add reverse part
         while (currInd >= 0) {
             char currChar = word[currInd];
             int index = currChar - 'a';
@@ -90,15 +103,13 @@ bool ScrabbleGaddag::includes(std::string word) {
             currInd--;
         }
         currInd = firstInd + 1;
-        // add delimiter
-        if (currInd != word.size()) {
+        if (currInd != len) {
             if (!curr->children[26]) {
                 return false;
             }
             curr=curr->children[26];
         }
-        // add forward part
-        while (currInd < word.size()) {
+        while (currInd < len) {
             char currChar = word[currInd];
             int index = currChar - 'a';
             if (!curr->children[index]) {
@@ -107,7 +118,6 @@ bool ScrabbleGaddag::includes(std::string word) {
             curr=curr->children[index];
             currInd++;
         }
-        // check if terminal
         if (!curr->terminal) {
             return false;
         }

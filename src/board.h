@@ -27,6 +27,7 @@ public:
     const Square& getSquare(int row, int col) const;
     void print(ostream& out) const;
     bool isEmpty() const;
+    bool loadFile(const string& path, string& msg);
     bool isAnchor(Position pos) const;
     bool isOccupied(Position pos) const;
     char getLetter(Position pos) const;

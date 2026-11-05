@@ -1,7 +1,9 @@
 #include "board.h"
+#include "move.h"
 using namespace std;
 #include <iomanip>
 #include <stdexcept>
+#include <fstream>
 
 
 
@@ -67,31 +69,90 @@ bool Board::isEmpty() const {
     return true;
 }
 
-bool Board::isAnchor(Position pos) const {
-    if (isEmpty()) {
-        return (pos.row == 8 && pos.column == 8); // on an empty board, you can play on the middle square 
+bool Board::loadFile(const string& path, string& msg) {
+    msg.clear();
+    ifstream file(path);
+    if (!file.is_open()) {
+        msg = "Cannot open board file: " + path;
+        return false;
     }
-    return (grid[pos.row][pos.column].isEmpty()) && hasNeighbor(pos);
+
+    Board temp;
+    string line;
+    for (int row = 0; row < Size; row++) {
+        if (!getline(file, line)) {
+            msg = "The board file must contain exactly 15 rows.";
+            return false;
+        }
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        if (row == 0 && line.compare(0, 3, "\xEF\xBB\xBF") == 0) {
+            line.erase(0, 3);
+        }
+        if (line.length() != Size) {
+            msg = "Row " + to_string(row + 1) + " must contain exactly 15 characters.";
+            return false;
+        }
+        for (int col = 0; col < Size; col++) {
+            char ch = line[col];
+            if (ch >= 'a' && ch <= 'z') {
+                ch = ch - 'a' + 'A';
+            }
+            if (ch == '.') {
+                temp.grid[row][col].letter = ' ';
+            } else if (ch >= 'A' && ch <= 'Z') {
+                temp.grid[row][col].letter = ch;
+            } else {
+                msg = "Use only letters A-Z and dots for empty squares (row "
+                    + to_string(row + 1) + ").";
+                return false;
+            }
+        }
+    }
+    if (getline(file, line)) {
+        msg = "The board file must contain exactly 15 rows.";
+        return false;
+    }
+    if (file.bad()) {
+        msg = "There was a problem reading the board file.";
+        return false;
+    }
+    *this = temp;
+    return true;
+}
+
+bool Board::isAnchor(Position pos) const {
+    if (!withinBoard(pos)) {
+        return false;
+    }
+    if (isEmpty()) {
+        return pos.row == Size/ 2 && pos.column == Size/ 2;
+    }
+    return (grid[pos.row][pos.column].isEmpty()) &&  hasNeighbor(pos);
 }
 
 bool Board::isOccupied(Position pos) const {
-    return withinBoard(pos) && !grid[pos.row][pos.column].isEmpty();
+    return withinBoard(pos)&&  !grid[pos.row][pos.column].isEmpty();
 }
 char Board::getLetter(Position pos) const {
+    if  (!withinBoard(pos) ) {
+        return ' ';
+    }
     return grid[pos.row][pos.column].letter;
 } 
 
 bool Board::hasNeighbor(Position pos) const {
-    if (pos.row > 0 && !grid[pos.row - 1][pos.column].isEmpty()) {
+    if (pos.row > 0&& !grid[pos.row - 1][pos.column].isEmpty()) {
         return true;
     }
-    if (pos.row < Size - 1 && !grid[pos.row + 1][pos.column].isEmpty()) {
+    if (pos.row < Size- 1 && !grid[pos.row + 1][pos.column].isEmpty()) {
         return true;
     }
-    if (pos.column > 0 && !grid[pos.row][pos.column - 1].isEmpty()) {
+    if (pos.column > 0 && !grid[pos.row][pos.column- 1].isEmpty()) {
         return true;
     }
-    if (pos.column < Size - 1 && !grid[pos.row][pos.column + 1].isEmpty()) {
+    if (pos.column < Size - 1 && !grid[pos.row][pos.column+ 1].isEmpty()) {
         return true;
     }
     return false;
@@ -115,7 +176,7 @@ string Board::read(Position pos, int dr, int dc) const {
     string word;
     while (withinBoard(pos) && !grid[pos.row][pos.column].isEmpty()) {
         word += grid[pos.row][pos.column].letter;
-        pos.row += dr;
+        pos.row +=dr;
         pos.column += dc;
     }
     return word;
@@ -141,15 +202,10 @@ string Board::getWord(Position start, Position end) const {
 }
 
 bool Board::inDict(const string& word, ScrabbleTrie& dict) const {
-    string lower = word;
-    for (char& ch : lower) {
-        ch = ch - 'A' + 'a';
-    }
-    return dict.search(lower);
+    return hasTrieWord(dict.getRoot(), word);
 }
 
-bool Board::placeWord(const string& word, Position start, Position end,
-                      string& rack, ScrabbleTrie& dict, string& msg) {
+bool Board::placeWord(const string& word,Position start, Position end,string& rack, ScrabbleTrie& dict, string& msg) {
     msg.clear();
     if (word.empty() || word.size() > Size || !containLetters(word)) {
         msg = "word must contain 1-15 letters (A-Z).";
@@ -239,12 +295,13 @@ bool Board::placeWord(const string& word, Position start, Position end,
         msg = "Place at least one new tile; that word is already on the board.";
         return false;
     }
-
     bool first = isEmpty();
     if (first && !center) {
         msg =  "The first word must cover the center star at H8.";
         return false;
     }
+
+
     if (first && wordLen < 2) {
         msg =  "The first word must contain at least two letters.";
         return false;
@@ -253,7 +310,6 @@ bool Board::placeWord(const string& word, Position start, Position end,
         msg = "The word must connect to the tiles already on the board.";
         return false;
     }
-
     Board temp = *this;
     pos = start;
     for (int idx = 0; idx < wordLen; idx++) {
@@ -261,20 +317,17 @@ bool Board::placeWord(const string& word, Position start, Position end,
         pos.row += dr;
         pos.column += dc;
     }
-
     string full = temp.getWord(start, end);
     if (full.length() < 2 || !inDict(full, dict)) {
         msg = "The word " + full + " is not in the dictionary.";
         return false;
     }
-
-    
     pos = start;
     for (int idx = 0; idx < wordLen; idx++) {
         if (grid[pos.row][pos.column].isEmpty()) {
             string cross = temp.read(pos, dc, dr);
             if (cross.length() > 1 && !inDict(cross, dict)) {
-                msg = "The crossing word " + cross + " is not in the dictionary.";
+                msg = "The crossing word "+ cross + " is not in the dictionary.";
                 return false;
             }
         }
@@ -295,7 +348,7 @@ void Board::print(ostream& out) const {
         out << setw(2) << row+ 1 << " |";
         for (int col = 0; col < Size; col++) {
             char ch = grid[row][col].letter;
-            if (grid[row][col].isEmpty() && row == Size / 2 && col == Size / 2) {
+            if (grid[row][col].isEmpty() && row == Size/ 2  && col == Size/ 2) {
                 ch = '*';
             }
             out << ' ' << ch << " |";

@@ -3,14 +3,13 @@ project(DSA_Project_2_Scrabble)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(DSA_Project_2_Scrabble
-        src/main.cpp
+set(SCRABBLE_SRC
         src/board.cpp
-        src/board.h
         src/cli.cpp
-        src/cli.h
         src/trie.cpp
-        src/trie.h
         src/gaddag.cpp
-        src/gaddag.h
+        src/move.cpp
+        src/trie-movegen.cpp
+        src/gaddag-movegen.cpp
+        src/game.cpp
 )

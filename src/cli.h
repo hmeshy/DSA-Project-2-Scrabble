@@ -2,10 +2,11 @@
 #define DSA_PROJECT_2_SCRABBLE_CLI_H
 
 #include "board.h"
+#include "gaddag.h"
 
 #include <istream>
 #include <ostream>
 
-void runWord(Board& board, ScrabbleTrie& dict, std::istream& in, std::ostream& out);
+void runMenu(ScrabbleTrie& dict, ScrabbleGaddag& gad, std::istream& in, std::ostream& out);
 
 #endif
