@@ -162,7 +162,7 @@ bool readRequest(const vector<string>& args, const string& gameRack,
     req.solver = solver;
     size_t countIdx;
 
-    // In a game, "moves 3" uses the player's actual rack.
+    
     if (!gameRack.empty() && args.size() >= 2 && parseCount(args[1], req.n)) {
         req.rack = gameRack;
         countIdx = 1;
@@ -175,7 +175,7 @@ bool readRequest(const vector<string>& args, const string& gameRack,
         countIdx = 2;
     }
     if (!validRack(req.rack) || countIdx >= args.size() || !parseCount(args[countIdx], req.n)) {
-        msg = "Use a rack of 1-7 letters and a result count from 1 to 20.";
+        msg = "Use 1-7 rack tiles (A-Z or ? for blanks) and a result count from 1 to 20.";
         return false;
     }
     if (!gameRack.empty()) {
@@ -337,6 +337,8 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
     int passes = 0;
     string solver = "GADDAG";
     out << "Racks are dealt and refilled automatically. Two consecutive passes end the game.\n";
+    out << "? is a blank worth 0 points. Use uppercase for normal tiles, lowercase to choose a blank.\n";
+    out << "Example: CaT uses a blank as A. Missing uppercase letters use blanks automatically.\n";
     while (true) {
         board.print(out);
         out << "\nTurn " << turn << " - Player " << player + 1 << '\n';
@@ -348,11 +350,12 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
             if (!readPrompt(in, out, "Word (or moves N, timing N, :pass, :back): ", line)) {
                 return false;
             }
-            string word = upperText(line);
-            if (word == ":BACK") {
+            string word = line;
+            string cmd = upperText(line);
+            if (cmd == ":BACK") {
                 return true;
             }
-            if (word == ":PASS") {
+            if (cmd == ":PASS") {
                 passes++;
                 if (passes == 2) {
                     finishGame(p, -1, out);
