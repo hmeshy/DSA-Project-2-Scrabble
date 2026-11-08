@@ -155,13 +155,13 @@ bool Board::isAnchor(Position pos) const {
         return false;
     }
     if (isEmpty()) {
-        return pos.row == Size/ 2 && pos.column == Size/ 2;
+        return pos.row == 7 && pos.column == 7;
     }
     return (grid[pos.row][pos.column].isEmpty()) &&  hasNeighbor(pos);
 }
 
 bool Board::isOccupied(Position pos) const {
-    return withinBoard(pos)&&  !grid[pos.row][pos.column].isEmpty();
+    return withinBoard(pos) && !grid[pos.row][pos.column].isEmpty();
 }
 char Board::getLetter(Position pos) const {
     if  (!withinBoard(pos) ) {
@@ -171,7 +171,7 @@ char Board::getLetter(Position pos) const {
 } 
 
 bool Board::hasNeighbor(Position pos) const {
-    if (pos.row > 0&& !grid[pos.row - 1][pos.column].isEmpty()) {
+    if (pos.row > 0 && !grid[pos.row - 1][pos.column].isEmpty()) {
         return true;
     }
     if (pos.row < Size- 1 && !grid[pos.row + 1][pos.column].isEmpty()) {
@@ -284,13 +284,13 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
     }
     string tiles = word;
 
-    // Reserve blanks requested with lowercase letters before using other tiles.
+    // Handle blanks first
     Position pos = start;
     for (char ch : word) {
         if (!isOccupied(pos) && ch >= 'a' && ch <= 'z') {
             size_t idx = rackLeft.find('?');
             if (idx == string::npos) {
-                msg = "A lowercase letter uses a blank, but your rack has no blank left.";
+                msg = "Your rack does not have enough blanks to play this move.";
                 return false;
             }
             rackLeft.erase(idx, 1);
@@ -303,7 +303,7 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
     bool center = false;
     pos = start;
 
-    
+    // Handle standard letters
     for (int idx = 0; idx < wordLen; idx++) {
         Square sq = grid[pos.row][pos.column];
         char letter = word[idx];
@@ -312,13 +312,9 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
             if (letter >= 'A' && letter <= 'Z') {
                 size_t rackIdx = rackLeft.find(letter);
                 if (rackIdx == string::npos) {
-                    rackIdx = rackLeft.find('?');
-                    if (rackIdx == string::npos) {
                         msg = string("Your rack does not have enough ") + letter
-                            + " tiles or blanks for this placement.";
+                            + " tiles for this placement.";
                         return false;
-                    }
-                    tiles[idx] = letter - 'A' + 'a';
                 }
                 rackLeft.erase(rackIdx, 1);
             }

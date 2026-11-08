@@ -272,7 +272,7 @@ bool analysis(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
         out << msg << '\n';
     }
     board.print(out);
-    out << "Commands: moves RACK N , timing RACK N, load FILE, show, back, :quit\n";
+    out << "Commands: moves RACK N, timing RACK N, load FILE, show, :back, :quit\n";
     string solver = "GADDAG";
     while (readPrompt(in, out, "analysis> ", line)) {
         vector<string> args = split(line);
@@ -280,10 +280,10 @@ bool analysis(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
             continue;
         }
         string cmd = upperText(args[0]);
-        if (cmd == "BACK" || cmd == ":BACK") {
+        if (cmd == ":BACK") {
             return true;
         }
-        if (cmd == "QUIT") {
+        if (cmd == ":QUIT") {
             return false;
         }
         if (cmd == "MOVES" || cmd == "TIMING") {
@@ -315,7 +315,7 @@ void finishGame(Player p[2], int winner, ostream& out) {
     } else if (winner == 1) {
         p[1].pts += left1;
     }
-    out << "\nFinal scores (remaining rack values deducted):\n";
+    out << "\nFinal scores: \n";
     out << "Player 1: " << p[0].pts << "\nPlayer 2: " << p[1].pts << '\n';
     if (p[0].pts == p[1].pts) {
         out << "The game is a tie.\n";
@@ -337,7 +337,7 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
     int passes = 0;
     string solver = "GADDAG";
     out << "Racks are dealt and refilled automatically. Two consecutive passes end the game.\n";
-    out << "? is a blank worth 0 points. Use uppercase for normal tiles, lowercase to choose a blank.\n";
+    out << "? represents a blank tile, worth 0 points but able to be played as any letter. Use uppercase for normal tiles, lowercase to choose a blank.\n";
     out << "Example: CaT uses a blank as A. Missing uppercase letters use blanks automatically.\n";
     out << "Bonus squares count only for new tiles. Playing 7 tiles in one turn adds 50 points.\n";
     while (true) {
@@ -348,7 +348,7 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
         out << "Your rack: " << p[player].rack << '\n';
         while (true) {
             string line;
-            if (!readPrompt(in, out, "Word (or moves N, timing N, :pass, :back): ", line)) {
+            if (!readPrompt(in, out, "Word (or moves N, timing N, :pass, :back, :quit): ", line)) {
                 return false;
             }
             string word = line;
