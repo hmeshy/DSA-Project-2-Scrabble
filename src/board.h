@@ -8,6 +8,8 @@ using namespace std;
 struct Square {
     // Uppercase = normal tile, lowercase = assigned blank, space = empty.
     char letter;
+    int letterMult = 1;
+    int wordMult = 1;
 
     bool isEmpty() const {
         return letter == ' ';

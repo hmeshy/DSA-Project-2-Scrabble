@@ -14,6 +14,36 @@ Board::Board() {
             grid[row][col].letter = ' ';
         }
     }
+
+    // Positions use row and column numbers from 0 to 14.
+    Position tw[] = {{0,0}, {0,7}, {0,14}, {7,0}, {7,14}, {14,0}, {14,7}, {14,14}};
+    Position dw[] = {
+        {1,1}, {1,13}, {2,2}, {2,12}, {3,3}, {3,11}, {4,4}, {4,10}, {7,7},
+        {10,4}, {10,10}, {11,3}, {11,11}, {12,2}, {12,12}, {13,1}, {13,13}
+    };
+    Position tl[] = {
+        {1,5}, {1,9}, {5,1}, {5,5}, {5,9}, {5,13},
+        {9,1}, {9,5}, {9,9}, {9,13}, {13,5}, {13,9}
+    };
+    Position dl[] = {
+        {0,3}, {0,11}, {2,6}, {2,8}, {3,0}, {3,7}, {3,14},
+        {6,2}, {6,6}, {6,8}, {6,12}, {7,3}, {7,11},
+        {8,2}, {8,6}, {8,8}, {8,12}, {11,0}, {11,7}, {11,14},
+        {12,6}, {12,8}, {14,3}, {14,11}
+    };
+
+    for (Position pos : tw) {
+        grid[pos.row][pos.column].wordMult = 3;
+    }
+    for (Position pos : dw) {
+        grid[pos.row][pos.column].wordMult = 2;
+    }
+    for (Position pos : tl) {
+        grid[pos.row][pos.column].letterMult = 3;
+    }
+    for (Position pos : dl) {
+        grid[pos.row][pos.column].letterMult = 2;
+    }
 }
 
 bool Board::containLetters(const string& txt) const {
@@ -373,17 +403,30 @@ void Board::print(ostream& out) const {
     for (int row = 0; row < Size; row++) {
         out << setw(2) << row+ 1 << " |";
         for (int col = 0; col < Size; col++) {
-            char ch = grid[row][col].letter;
-            if (grid[row][col].isEmpty() && row == Size/ 2  && col == Size/ 2) {
-                ch = '*';
+            const Square& sq = grid[row][col];
+            string label = " ";
+            if (!sq.isEmpty()) {
+                label = sq.letter;
+            } else if (row == Size / 2 && col == Size / 2) {
+                label = "*";
+            } else if (sq.wordMult == 3) {
+                label = "TW";
+            } else if (sq.wordMult == 2) {
+                label = "DW";
+            } else if (sq.letterMult == 3) {
+                label = "TL";
+            } else if (sq.letterMult == 2) {
+                label = "DL";
             }
-            out << ' ' << ch << " |";
+            out << ' ' << left << setw(2) << label << right << '|';
         }
         out << ' ' << setw(2) << row + 1 << '\n';
         printBorder(out);
     }
 
     printCol(out);
-    out << "\n  * = Starting square (H8)\n";
+    out << "\n  DL = Double letter | TL = Triple letter\n";
+    out << "  DW = Double word   | TW = Triple word\n";
+    out << "  * = Starting square (H8), also double word\n";
     out << "  Lowercase letter = blank tile (0 points)\n";
 }
