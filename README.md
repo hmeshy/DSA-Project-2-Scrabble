@@ -10,25 +10,6 @@
 
 - Complete scrabble board implementation, with the ability to play a game or analyze a position.
 
-# Scoring
-Empty bonus squares are marked `DL` (double letter), `TL` (triple letter),
-`DW` (double word), and `TW` (triple word). The center `*` at H8 is also a
-double-word square. Placed tiles cover these labels.
-
-Bonus squares apply only when a new tile is placed on them. Letter bonuses are
-applied before word bonuses, and multiple word bonuses multiply together.
-Each crossing word is scored separately, including the new tile's bonus.
-Previously placed tiles count at their normal value; blanks stay worth zero.
-A blank can still activate a double-word or triple-word square.
-
-Playing seven new tiles in one turn adds 50 points after all words and
-multipliers are scored. A seven-letter word using an old tile does not qualify,
-and emptying a rack containing fewer than seven tiles does not qualify.
-This scoring is used for both gameplay and the move suggestions from both solvers.
-
-Board files still use letters and dots. The standard bonus layout is added
-automatically, and tiles loaded from a file are treated as already played.
-
 # Setup
 You can generate the build directory and build the program with the commands
 ```bash
