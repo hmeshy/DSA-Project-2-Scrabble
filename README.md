@@ -42,7 +42,7 @@ moves RACK N, timing RACK N, load FILE, show, back, :quit
 | ```timing RACK N```  | Time both the GADDAG and Trie implementations on a given rack; print highest N scoring moves for a given rack and set the faster data structure as the default for ```moves```.   |
 | ```load FILE```  | Loads the boards at the directory ```FILE```  |
 | ```show```  | Prints the board  |
-| ```back```  | Returns to the main menu  |
+| ```:back```  | Returns to the main menu  |
 | ```:quit```  | Exits the program  |
 
 
