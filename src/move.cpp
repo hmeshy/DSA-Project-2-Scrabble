@@ -177,18 +177,28 @@ int scoreWord(const string& word) {
 }
 
 int scoreMove(const Board& board, const Move& move) {
-    int pts = 0;
+    int mainPts = 0;
+    int wordMult = 1;
+    int crossPts = 0;
+    int added = 0;
     Position pos{move.startRow, move.startCol};
     for (char ch : move.word) {
         if (board.isOccupied(pos)) {
-            // Keep an old blank worth zero even if the entered word is uppercase.
-            pts += scoreWord(string(1, board.getLetter(pos)));
+            // Old tiles keep their value, but their bonus squares cannot be reused.
+            mainPts += scoreWord(string(1, board.getLetter(pos)));
         } else {
-            pts += scoreWord(string(1, ch));
+            const Square& sq = board.getSquare(pos.row, pos.column);
+            int tilePts = scoreWord(string(1, ch)) * sq.letterMult;
+            mainPts += tilePts;
+            wordMult *= sq.wordMult;
+            added++;
+
             string before, after;
             crossParts(board, pos, move.horizontal, before, after);
             if (!before.empty() || !after.empty()) {
-                pts += scoreWord(before + ch + after);
+                // The new tile's bonus also applies to its crossing word.
+                int cross = scoreWord(before) + tilePts + scoreWord(after);
+                crossPts += cross * sq.wordMult;
             }
         }
         if (move.horizontal) {
@@ -196,6 +206,11 @@ int scoreMove(const Board& board, const Move& move) {
         } else {
             pos.row++;
         }
+    }
+    int pts = mainPts * wordMult + crossPts;
+    // Count new tiles, not the total word length. Add this after all multipliers.
+    if (added == 7) {
+        pts += 50;
     }
     return pts;
 }

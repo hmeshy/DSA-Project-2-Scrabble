@@ -339,6 +339,7 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
     out << "Racks are dealt and refilled automatically. Two consecutive passes end the game.\n";
     out << "? is a blank worth 0 points. Use uppercase for normal tiles, lowercase to choose a blank.\n";
     out << "Example: CaT uses a blank as A. Missing uppercase letters use blanks automatically.\n";
+    out << "Bonus squares count only for new tiles. Playing 7 tiles in one turn adds 50 points.\n";
     while (true) {
         board.print(out);
         out << "\nTurn " << turn << " - Player " << player + 1 << '\n';
@@ -391,6 +392,7 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
             }
             Board prev = board;
             string msg;
+            size_t rackLen = p[player].rack.length();
             if (!board.placeWord(word, start, end, p[player].rack, dict, msg)) {
                 out << msg << "\nTry again with the same rack: " << p[player].rack << ".\n";
                 continue;
@@ -399,6 +401,9 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
             int pts = scoreMove(prev, move);
             p[player].pts += pts;
             out << "Placed " << printMove(move) << ". Move score: " << pts << " points.\n";
+            if (rackLen - p[player].rack.length() == 7) {
+                out << "All 7 tiles played! Your move score includes a 50-point bonus.\n";
+            }
             bag.refill(p[player].rack);
             out << "Your rack after refill: " << p[player].rack << '\n';
             passes = 0;
