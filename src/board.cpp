@@ -4,6 +4,7 @@ using namespace std;
 #include <iomanip>
 #include <stdexcept>
 #include <fstream>
+#include <cctype>
 
 
 
@@ -17,7 +18,7 @@ Board::Board() {
 
 bool Board::containLetters(const string& txt) const {
     for (char letter : txt) {
-        if ( letter < 'A' || letter > 'Z') {
+        if ((letter < 'A' || letter > 'Z') && (letter < 'a' || letter > 'z')) {
             return false;
         }
     }
@@ -96,15 +97,12 @@ bool Board::loadFile(const string& path, string& msg) {
         }
         for (int col = 0; col < Size; col++) {
             char ch = line[col];
-            if (ch >= 'a' && ch <= 'z') {
-                ch = ch - 'a' + 'A';
-            }
             if (ch == '.') {
                 temp.grid[row][col].letter = ' ';
-            } else if (ch >= 'A' && ch <= 'Z') {
+            } else if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
                 temp.grid[row][col].letter = ch;
             } else {
-                msg = "Use only letters A-Z and dots for empty squares (row "
+                msg = "Use A-Z for normal tiles, a-z for blanks, and dots for empty squares (row "
                     + to_string(row + 1) + ").";
                 return false;
             }
@@ -211,8 +209,8 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
         msg = "word must contain 1-15 letters (A-Z).";
         return false;
     }
-    if (rack.empty() || rack.size() > 7 || !containLetters(rack)) {
-        msg = "rack has to contain 1-7 letters (A-Z). ";
+    if (!validRack(rack)) {
+        msg = "Your rack must contain 1-7 letters or ? for blanks.";
         return false;
     }
     if (!withinBoard(start) || !withinBoard(end) ) {
@@ -251,10 +249,29 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
     }
 
     string rackLeft = rack;
+    for (char& ch : rackLeft) {
+        ch = static_cast<char>(toupper(static_cast<unsigned char>(ch)));
+    }
+    string tiles = word;
+
+    // Reserve blanks requested with lowercase letters before using other tiles.
+    Position pos = start;
+    for (char ch : word) {
+        if (!isOccupied(pos) && ch >= 'a' && ch <= 'z') {
+            size_t idx = rackLeft.find('?');
+            if (idx == string::npos) {
+                msg = "A lowercase letter uses a blank, but your rack has no blank left.";
+                return false;
+            }
+            rackLeft.erase(idx, 1);
+        }
+        pos.row += dr;
+        pos.column += dc;
+    }
     int added = 0;
     bool touch = false;
     bool center = false;
-    Position pos = start;
+    pos = start;
 
     
     for (int idx = 0; idx < wordLen; idx++) {
@@ -262,15 +279,22 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
         char letter = word[idx];
 
         if (sq.isEmpty()) {
-            size_t rackIdx= rackLeft.find(letter);
-            if (rackIdx == string::npos) {
-                msg = string("Your rack does not have enough ") + letter
-                    + " tiles for this placement.";
-                return false;
+            if (letter >= 'A' && letter <= 'Z') {
+                size_t rackIdx = rackLeft.find(letter);
+                if (rackIdx == string::npos) {
+                    rackIdx = rackLeft.find('?');
+                    if (rackIdx == string::npos) {
+                        msg = string("Your rack does not have enough ") + letter
+                            + " tiles or blanks for this placement.";
+                        return false;
+                    }
+                    tiles[idx] = letter - 'A' + 'a';
+                }
+                rackLeft.erase(rackIdx, 1);
             }
-            rackLeft.erase(rackIdx, 1);
             added++;
-        } else if (sq.letter != letter) {
+        } else if (toupper(static_cast<unsigned char>(sq.letter))
+                   != toupper(static_cast<unsigned char>(letter))) {
             string coord;
             char colChar = 'A' +pos.column;
             coord += colChar;
@@ -313,7 +337,9 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
     Board temp = *this;
     pos = start;
     for (int idx = 0; idx < wordLen; idx++) {
-        temp.grid[pos.row][pos.column].letter = word[idx];
+        if (grid[pos.row][pos.column].isEmpty()) {
+            temp.grid[pos.row][pos.column].letter = tiles[idx];
+        }
         pos.row += dr;
         pos.column += dc;
     }
@@ -359,4 +385,5 @@ void Board::print(ostream& out) const {
 
     printCol(out);
     out << "\n  * = Starting square (H8)\n";
+    out << "  Lowercase letter = blank tile (0 points)\n";
 }

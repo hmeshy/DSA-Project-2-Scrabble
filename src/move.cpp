@@ -37,7 +37,7 @@ bool validRack(const string& rack) {
     }
     for (char ch : rack) {
         ch = upper(ch);
-        if (ch < 'A' || ch > 'Z') {
+        if (ch != '?' && (ch < 'A' || ch > 'Z')) {
             return false;
         }
     }
@@ -49,8 +49,13 @@ void countRack(const string& rack, int cnt[26]) {
         cnt[idx] = 0;
     }
     for (char ch : rack) {
+        if (ch == '?') {
+            continue;
+        }
         int idx = upper(ch) - 'A';
-        cnt[idx]++;
+        if (idx >= 0 && idx < 26) {
+            cnt[idx]++;
+        }
     }
 }
 
@@ -158,7 +163,10 @@ int scoreWord(const string& word) {
     static const map<char, int> vals = createScores();
     int pts = 0;
     for (char ch : word) {
-        ch = upper(ch);
+        // Lowercase letters are assigned blanks. A rack's '?' is also worth zero.
+        if (ch == '?' || (ch >= 'a' && ch <= 'z')) {
+            continue;
+        }
         if (ch < 'A' || ch > 'Z') {
             return 0;
         }
@@ -169,10 +177,14 @@ int scoreWord(const string& word) {
 }
 
 int scoreMove(const Board& board, const Move& move) {
-    int pts = scoreWord(move.word);
+    int pts = 0;
     Position pos{move.startRow, move.startCol};
     for (char ch : move.word) {
-        if (!board.isOccupied(pos)) {
+        if (board.isOccupied(pos)) {
+            // Keep an old blank worth zero even if the entered word is uppercase.
+            pts += scoreWord(string(1, board.getLetter(pos)));
+        } else {
+            pts += scoreWord(string(1, ch));
             string before, after;
             crossParts(board, pos, move.horizontal, before, after);
             if (!before.empty() || !after.empty()) {

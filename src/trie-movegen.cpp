@@ -1,4 +1,6 @@
 #include "trie-movegen.h"
+#include <algorithm>
+#include <cctype>
 
 namespace {
 class TrieSearch {
@@ -6,6 +8,7 @@ class TrieSearch {
     const TrieNode* root;
     MoveChecks checks{};
     int cnt[26];
+    int blanks;
     vector<Move> moves;
     bool horiz;
     int dr;
@@ -39,18 +42,27 @@ class TrieSearch {
         Position next{pos.row + dr, pos.column + dc};
         if (board.isOccupied(pos)) {
             char ch = board.getLetter(pos);
-            const TrieNode* child = node->childrens[ch - 'A'];
+            int idx = toupper(static_cast<unsigned char>(ch)) - 'A';
+            const TrieNode* child = node->childrens[idx];
             if (child != nullptr) walk(child, next, start, word + ch, added, hit);
             return;
         }
 
         for (int idx = 0; idx < 26; idx++) {
             const TrieNode* child = node->childrens[idx];
-            if (cnt[idx] > 0 && child != nullptr && allowed(checks, pos, idx, horiz)) {
+            if (child == nullptr || !allowed(checks, pos, idx, horiz)) {
+                continue;
+            }
+            bool touch = hit || checks.cell[pos.row][pos.column].anchor;
+            if (cnt[idx] > 0) {
                 cnt[idx]--;
-                bool touch = hit || checks.cell[pos.row][pos.column].anchor;
                 walk(child, next, start, word + char('A' + idx), added + 1, touch);
                 cnt[idx]++;
+            }
+            if (blanks > 0) {
+                blanks--;
+                walk(child, next, start, word + char('a' + idx), added + 1, touch);
+                blanks++;
             }
         }
     }
@@ -59,6 +71,7 @@ public:
     TrieSearch(const Board& b, const string& rack, const TrieNode* node)
         : board(b), root(node) {
         countRack(rack, cnt);
+        blanks = static_cast<int>(count(rack.begin(), rack.end(), '?'));
         makeChecks(board, root, nullptr, checks);
     }
 
