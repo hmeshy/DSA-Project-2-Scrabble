@@ -68,7 +68,7 @@ bool hasTrieWord(const TrieNode* root, const string& word) {
         }
         node = node->childrens[ch - 'A'];
     }
-    return node->endofWord;
+    return node != nullptr && node->endofWord;
 }
 
 bool hasGaddagWord(const GaddagNode* root, const string& word) {
@@ -83,7 +83,7 @@ bool hasGaddagWord(const GaddagNode* root, const string& word) {
         }
         node = node->children[ch - 'A'];
     }
-    return node->terminal;
+    return node != nullptr && node->terminal;
 }
 
 void crossParts(const Board& board, Position pos, bool horiz, string& before, string& after) {
