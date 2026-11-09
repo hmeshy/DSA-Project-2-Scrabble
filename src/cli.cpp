@@ -336,10 +336,10 @@ bool playGame(ScrabbleTrie& dict, ScrabbleGaddag& gad, istream& in, ostream& out
     int turn = 1;
     int passes = 0;
     string solver = "GADDAG";
-    out << "Racks are dealt and refilled automatically. Two consecutive passes end the game.\n";
-    out << "? represents a blank tile, worth 0 points but able to be played as any letter. Use uppercase for normal tiles, lowercase to choose a blank.\n";
+    out << "Racks are dealt and refilled automatically and randomly. \n";
+    out << "? represents a blank tile, worth 0 points but able to be played as any letter. Use uppercase for normal tiles, lowercase to play a blank.\n";
     out << "Example: CaT uses a blank as A. Missing uppercase letters use blanks automatically.\n";
-    out << "Bonus squares count only for new tiles. Playing 7 tiles in one turn adds 50 points.\n";
+    out << "Bonus squares count only for new tiles. Playing 7 tiles in one turn is a bingo, which adds 50 points.\n";
     while (true) {
         board.print(out);
         out << "\nTurn " << turn << " - Player " << player + 1 << '\n';

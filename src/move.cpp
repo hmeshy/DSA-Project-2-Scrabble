@@ -49,9 +49,6 @@ void countRack(const string& rack, int cnt[26]) {
         cnt[idx] = 0;
     }
     for (char ch : rack) {
-        if (ch == '?') {
-            continue;
-        }
         int idx = upper(ch) - 'A';
         if (idx >= 0 && idx < 26) {
             cnt[idx]++;
@@ -71,7 +68,7 @@ bool hasTrieWord(const TrieNode* root, const string& word) {
         }
         node = node->childrens[ch - 'A'];
     }
-    return node != nullptr && node->endofWord;
+    return node->endofWord;
 }
 
 bool hasGaddagWord(const GaddagNode* root, const string& word) {
@@ -79,7 +76,6 @@ bool hasGaddagWord(const GaddagNode* root, const string& word) {
         return false;
     }
     const GaddagNode* node = root;
-    // The GADDAG also stores each complete word in reverse, without a delimiter.
     for (int idx = static_cast<int>(word.length()) - 1; idx >= 0; idx--) {
         char ch = upper(word[idx]);
         if (ch < 'A' || ch > 'Z' || node == nullptr) {
@@ -87,7 +83,7 @@ bool hasGaddagWord(const GaddagNode* root, const string& word) {
         }
         node = node->children[ch - 'A'];
     }
-    return node != nullptr && node->terminal;
+    return node->terminal;
 }
 
 void crossParts(const Board& board, Position pos, bool horiz, string& before, string& after) {
@@ -117,7 +113,7 @@ void crossParts(const Board& board, Position pos, bool horiz, string& before, st
 }
 
 void makeChecks(const Board& board, const TrieNode* trie, const GaddagNode* gad, MoveChecks& checks) {
-    // Work out which letters make valid crossing words at each empty square.
+    // Perform cross checks
     for (int row = 0; row < Board::Size; row++) {
         for (int col = 0; col < Board::Size; col++) {
             Position pos{row, col};
@@ -163,7 +159,7 @@ int scoreWord(const string& word) {
     static const map<char, int> vals = createScores();
     int pts = 0;
     for (char ch : word) {
-        // Lowercase letters are assigned blanks. A rack's '?' is also worth zero.
+        // Blanks are worth 0
         if (ch == '?' || (ch >= 'a' && ch <= 'z')) {
             continue;
         }
@@ -184,7 +180,7 @@ int scoreMove(const Board& board, const Move& move) {
     Position pos{move.startRow, move.startCol};
     for (char ch : move.word) {
         if (board.isOccupied(pos)) {
-            // Old tiles keep their value, but their bonus squares cannot be reused.
+            // Make sure not to use old bonus squares
             mainPts += scoreWord(string(1, board.getLetter(pos)));
         } else {
             const Square& sq = board.getSquare(pos.row, pos.column);
@@ -208,7 +204,7 @@ int scoreMove(const Board& board, const Move& move) {
         }
     }
     int pts = mainPts * wordMult + crossPts;
-    // Count new tiles, not the total word length. Add this after all multipliers.
+    // Bingo bonus (seperate from multipliers)
     if (added == 7) {
         pts += 50;
     }

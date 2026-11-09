@@ -22,7 +22,7 @@ struct Position {
 
 class Board {
 public:
-    static const int Size = 15;
+    static const int Size = 15; // A Scrabble board is 15 by 15
 
     Board();
 

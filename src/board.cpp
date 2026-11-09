@@ -15,7 +15,6 @@ Board::Board() {
         }
     }
 
-    // Positions use row and column numbers from 0 to 14.
     Position tw[] = {{0,0}, {0,7}, {0,14}, {7,0}, {7,14}, {14,0}, {14,7}, {14,14}};
     Position dw[] = {
         {1,1}, {1,13}, {2,2}, {2,12}, {3,3}, {3,11}, {4,4}, {4,10}, {7,7},
@@ -118,9 +117,6 @@ bool Board::loadFile(const string& path, string& msg) {
         if (!line.empty() && line.back() == '\r') {
             line.pop_back();
         }
-        if (row == 0 && line.compare(0, 3, "\xEF\xBB\xBF") == 0) {
-            line.erase(0, 3);
-        }
         if (line.length() != Size) {
             msg = "Row " + to_string(row + 1) + " must contain exactly 15 characters.";
             return false;
@@ -204,7 +200,7 @@ string Board::read(Position pos, int dr, int dc) const {
     string word;
     while (withinBoard(pos) && !grid[pos.row][pos.column].isEmpty()) {
         word += grid[pos.row][pos.column].letter;
-        pos.row +=dr;
+        pos.row += dr;
         pos.column += dc;
     }
     return word;
@@ -236,11 +232,11 @@ bool Board::inDict(const string& word, ScrabbleTrie& dict) const {
 bool Board::placeWord(const string& word,Position start, Position end,string& rack, ScrabbleTrie& dict, string& msg) {
     msg.clear();
     if (word.empty() || word.size() > Size || !containLetters(word)) {
-        msg = "word must contain 1-15 letters (A-Z).";
+        msg = "Word must contain 1-15 letters (A-Z).";
         return false;
     }
     if (!validRack(rack)) {
-        msg = "Your rack must contain 1-7 letters or ? for blanks.";
+        msg = "Your rack must contain 1-7 letters.";
         return false;
     }
     if (!withinBoard(start) || !withinBoard(end) ) {
@@ -252,7 +248,7 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
         return false;
     }
     if (end.row < start.row || end.column < start.column ) {
-        msg = "The ending position must be to the right of or below the starting position. Cannot in the left direction. ";
+        msg = "The ending position must be to the right of or below the starting position. Cannot in the left direction.";
         return false;
     }
 
@@ -333,7 +329,7 @@ bool Board::placeWord(const string& word,Position start, Position end,string& ra
         if (!sq.isEmpty()|| hasNeighbor(pos)) {
             touch = true;
         }
-        if (pos.row == Size / 2 && pos.column == Size / 2) {
+        if (pos.row == 7 && pos.column == 7) {
             center = true;
         }
 
